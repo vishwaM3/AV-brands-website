@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AV Brands - Premium Fashion & Clothing Store">
+    <title>{% block title %}AV Brands - Premium Fashion{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span><i class="fas fa-phone"></i> +91 9876543210</span>
+                        <span style="margin-left: 20px;"><i class="fas fa-envelope"></i> info@avbrands.com</span>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('set_language', lang='en') }}">English</a> | 
+                        <a href="{{ url_for('set_language', lang='kn') }}">ಕನ್ನಡ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header-main">
+            <div class="container">
+                <nav class="navbar">
+                    <a href="{{ url_for('index') }}" class="logo">AV <span>Brands</span></a>
+                    
+                    <ul class="nav-menu">
+                        <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">{{ 'Home' if lang == 'en' else 'ಮನೆ' }}</a></li>
+                        <li><a href="{{ url_for('shop') }}" class="nav-link {% if request.endpoint == 'shop' %}active{% endif %}">{{ 'Shop' if lang == 'en' else 'ಅಂಗಡಿ' }}</a></li>
+                        <li><a href="{{ url_for('contact') }}" class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}">{{ 'Contact' if lang == 'en' else 'ಸಂಪರ್ಕ' }}</a></li>
+                        <li><a href="{{ url_for('gallery') }}" class="nav-link {% if request.endpoint == 'gallery' %}active{% endif %}">{{ 'Gallery' if lang == 'en' else 'ಗ್ಯಾಲರಿ' }}</a></li>
+                    </ul>
+                    
+                    <div class="header-actions">
+                        <div class="search-box">
+                            <input type="text" class="search-input" id="searchInput" placeholder="{{ 'Search products...' if lang == 'en' else 'ಉತ್ಪನ್ನಗಳನ್ನು ಹುಡುಕಿ...' }}" onkeyup="searchProducts(this.value)">
+                            <button class="search-btn"><i class="fas fa-search"></i></button>
+                            <div id="searchResults" class="search-results" style="display: none;"></div>
+                        </div>
+                        
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('profile') }}" class="icon-btn"><i class="fas fa-user"></i></a>
+                            <a href="{{ url_for('wishlist') }}" class="icon-btn"><i class="fas fa-heart"></i></a>
+                            <a href="{{ url_for('orders') }}" class="icon-btn"><i class="fas fa-box"></i></a>
+                            {% if current_user.is_admin %}
+                                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-sm">Admin</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="icon-btn"><i class="fas fa-user"></i></a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('cart') }}" class="icon-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count">{{ get_cart_count() }}</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container" style="margin-top: 20px;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>AV Brands</h4>
+                    <p>{{ 'Your one-stop destination for premium fashion and clothing.' if lang == 'en' else 'ಪ್ರೀಮಿಯಂ ಫ್ಯಾಷನ್ ಮತ್ತು ಉಡುಗೆ ತೊಡಿಗೆಗಾಗಿ ನಿಮ್ಮ ಏಕೈಕ ತಾಣ.' }}</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>{{ 'Quick Links' if lang == 'en' else 'ತ್ವರಿತ ಲಿಂಕ್‌ಗಳು' }}</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('shop') }}">{{ 'All Products' if lang == 'en' else 'ಎಲ್ಲಾ ಉತ್ಪನ್ನಗಳು' }}</a></li>
+                        <li><a href="{{ url_for('contact') }}">{{ 'Contact Us' if lang == 'en' else 'ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ' }}</a></li>
+                        <li><a href="{{ url_for('comments') }}">{{ 'Feedback' if lang == 'en' else 'ಪ್ರತಿಕ್ರಿಯೆ' }}</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>{{ 'Customer Service' if lang == 'en' else 'ಗ್ರಾಹಕ ಸೇವೆ' }}</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">{{ 'Shipping Info' if lang == 'en' else 'ಶಿಪ್ಪಿಂಗ್ ಮಾಹಿತಿ' }}</a></li>
+                        <li><a href="#">{{ 'Returns' if lang == 'en' else 'ವಾಪಸಾತಿ' }}</a></li>
+                        <li><a href="#">{{ 'FAQ' if lang == 'en' else 'ಪ್ರಶ್ನೆಗಳು' }}</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>{{ 'Store Location' if lang == 'en' else 'ಅಂಗಡಿ ಸ್ಥಳ' }}</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> 123 Fashion Street</li>
+                        <li>Bangalore, Karnataka</li>
+                        <li>India - 560001</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 AV Brands. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Search functionality
+        function searchProducts(query) {
+            const resultsDiv = document.getElementById('searchResults');
+            if (query.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+            
+            fetch('/search?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.products.length > 0) {
+                        let html = '<div class="search-results-list">';
+                        data.products.forEach(product => {
+                            html += '<a href="' + product.url + '" class="search-result-item">';
+                            html += '<img src="/static/images/' + product.image + '" alt="">';
+                            html += '<div><strong>' + product.name + '</strong>';
+                            html += '<br><span class="price">₹' + product.price + '</span></div></a>';
+                        });
+                        html += '</div>';
+                        resultsDiv.innerHTML = html;
+                        resultsDiv.style.display = 'block';
+                    } else if (data.message) {
+                        resultsDiv.innerHTML = '<div class="search-no-result">' + data.message + '</div>';
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        resultsDiv.style.display = 'none';
+                    }
+                });
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-box')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

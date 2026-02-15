@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - AV Brands{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="container">
+        <div style="max-width: 400px; margin: 0 auto;">
+            <div style="background: var(--light-bg); padding: 30px; border-radius: 12px;">
+                <h2 style="text-align: center; margin-bottom: 30px;">Sign Up</h2>
+                <form method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        {{ form.username(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        {{ form.email(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        {{ form.phone(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        {{ form.password(class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        {{ form.confirm_password(class="form-control") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign Up</button>
+                </form>
+                <p style="text-align: center; margin-top: 20px;">
+                    Already have an account? <a href="{{ url_for('login') }}">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

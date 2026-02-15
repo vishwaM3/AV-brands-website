@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Shop' if lang == 'en' else 'ಅಂಗಡಿ' }} - AV Brands{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">{{ 'Home' if lang == 'en' else 'ಮನೆ' }}</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>{{ 'Shop' if lang == 'en' else 'ಅಂಗಡಿ' }}</span>
+        </div>
+        
+        <div class="section-title">
+            <h2>{{ 'All Products' if lang == 'en' else 'ಎಲ್ಲಾ ಉತ್ಪನ್ನಗಳು' }}</h2>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
+            <div style="flex: 1; min-width: 250px;">
+                <div style="background: var(--light-bg); padding: 20px; border-radius: 12px;">
+                    <h4>{{ 'Filters' if lang == 'en' else 'ಫಿಲ್ಟರ್‌ಗಳು' }}</h4>
+                    <form method="GET" action="{{ url_for('shop') }}">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'Category' if lang == 'en' else 'ವರ್ಗ' }}</label>
+                            <select name="category" class="form-control">
+                                <option value="">{{ 'All Categories' if lang == 'en' else 'ಎಲ್ಲಾ ವರ್ಗಗಳು' }}</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name_kannada if lang == 'kn' else cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ 'Sort By' if lang == 'en' else 'ವಿಂಗಡಿಸಿ' }}</label>
+                            <select name="sort" class="form-control">
+                                <option value="newest">{{ 'Newest First' if lang == 'en' else 'ಹೊಸದು ಮೊದಲು' }}</option>
+                                <option value="price_low">{{ 'Price: Low to High' if lang == 'en' else 'ಬೆಲೆ: ಕಡಿಮೆಯಿಂದ ಹೆಚ್ಚಿಗೆ' }}</option>
+                                <option value="price_high">{{ 'Price: High to Low' if lang == 'en' else 'ಬೆಲೆ: ಹೆಚ್ಚಿನಿಂದ ಕಡಿಮೆಗೆ' }}</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">{{ 'Apply Filters' if lang == 'en' else 'ಫಿಲ್ಟರ್‌ಗಳನ್ನು ಅನ್ವಯಿಸಿ' }}</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div style="flex: 3; min-width: 300px;">
+                {% if products %}
+                <div class="product-grid">
+                    {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="https://via.placeholder.com/300x300/1a1a2e/ffffff?text={{ product.name[:10] }}" alt="{{ product.name }}">
+                            <div class="product-badges">
+                                {% if product.discount_price %}
+                                <span class="product-badge badge-discount">-{{ product.get_discount_percentage() }}%</span>
+                                {% endif %}
+                                {% if not product.is_in_stock() %}
+                                <span class="product-badge badge-out-of-stock">{{ 'Out of Stock' if lang == 'en' else 'ಸ್ಟಾಕ್‌ನಲ್ಲಿಲ್ಲ' }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="product-actions">
+                                {% if current_user.is_authenticated %}
+                                <button class="action-btn" onclick="location.href='{{ url_for(\'add_to_wishlist\', product_id=product.id) }}'"><i class="fas fa-heart"></i></button>
+                                {% endif %}
+                                <button class="action-btn" onclick="location.href='{{ url_for(\'product_detail\', product_id=product.id) }}'"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">{{ product.category.name if product.category else '' }}</div>
+                            <h3 class="product-title"><a href="{{ url_for('product_detail', product_id=product.id) }}">{{ product.name_kannada if lang == 'kn' else product.name }}</a></h3>
+                            <div class="product-price">
+                                <span class="current-price">₹{{ "%.0f"|format(product.get_final_price()) }}</span>
+                                {% if product.discount_price %}
+                                <span class="original-price">₹{{ "%.0f"|format(product.price) }}</span>
+                                {% endif %}
+                            </div>
+                            {% if product.is_in_stock() %}
+                            <form action="{{ url_for('add_to_cart') }}" method="POST">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">{{ 'Add to Cart' if lang == 'en' else 'ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ' }}</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-search" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+                    <h3>{{ 'No products found' if lang == 'en' else 'ಯಾವುದೇ ಉತ್ಪನ್ನಗಳು ಕಂಡುಬಂದಿಲ್ಲ' }}</h3>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

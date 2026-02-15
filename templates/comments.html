@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ 'Your Messages' if lang == 'en' else 'ನಿಮ್ಮ ಸಂದೇಶಗಳು' }}</h2>
+
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.comment_type.label }} {{ form.comment_type() }}
+    </div>
+    <div>
+        {{ form.subject.label }} {{ form.subject() }}
+    </div>
+    <div>
+        {{ form.message.label }} {{ form.message() }}
+    </div>
+    <div>
+        <button type="submit">{{ 'Submit' if lang == 'en' else 'ಸಲ್ಲಿಸು' }}</button>
+    </div>
+</form>
+
+<hr>
+
+<ul>
+{% for c in user_comments %}
+    <li>
+        <strong>{{ c.subject or '(no subject)' }}</strong> — {{ c.message }}<br>
+        <small>{{ 'Submitted on' if lang == 'en' else 'ಸಲ್ಲಿಸಿದ ದಿನಾಂಕ' }}: {{ c.created_at }}</small><br>
+        {% if c.is_answered %}
+            <div><strong>{{ 'Response:' if lang == 'en' else 'ಪ್ರತಿಕ್ರಿಯೆ:' }}</strong> {{ c.admin_response }}</div>
+            <div><small>{{ 'Responded by' if lang == 'en' else 'ಪ್ರತಿಕ್ರಿಯಿಸಿದವರು' }}: {{ c.responder.username if c.responder else '' }}</small></div>
+        {% endif %}
+    </li>
+{% else %}
+    <li>{{ 'No messages yet.' if lang == 'en' else 'ಇನ್ನೂ ಸಂದೇಶಗಳಿಲ್ಲ.' }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

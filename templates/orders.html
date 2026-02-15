@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - AV Brands{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="container">
+        <h1 style="margin-bottom: 30px;">My Orders</h1>
+        
+        {% if orders %}
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            {% for order in orders %}
+            <div style="background: var(--light-bg); padding: 20px; border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div>
+                        <h3>Order #{{ order.order_number }}</h3>
+                        <small>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div>
+                        {% if order.status == 'pending' %}
+                        <span class="badge badge-warning">Pending</span>
+                        {% elif order.status == 'processing' %}
+                        <span class="badge badge-info">Processing</span>
+                        {% elif order.status == 'shipped' %}
+                        <span class="badge badge-primary">Shipped</span>
+                        {% elif order.status == 'delivered' %}
+                        <span class="badge badge-success">Delivered</span>
+                        {% elif order.status == 'cancelled' %}
+                        <span class="badge badge-danger">Cancelled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p><strong>Items:</strong> {{ order.items|length }}</p>
+                        <p><strong>Total:</strong> Rs.{{ "%.0f"|format(order.total_amount) }}</p>
+                    </div>
+                    <a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn btn-primary btn-sm">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fas fa-box" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+            <h3>No orders yet</h3>
+            <p>Start shopping to see your orders here!</p>
+            <a href="{{ url_for('shop') }}" class="btn btn-primary">Shop Now</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

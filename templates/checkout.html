@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - AV Brands{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>Checkout</span>
+        </div>
+        
+        <h1 style="margin-bottom: 30px;">Checkout</h1>
+        
+        <form method="POST">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                <div>
+                    <div style="background: var(--light-bg); padding: 25px; border-radius: 12px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 20px;">Shipping Information</h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            {{ form.shipping_name(class="form-control") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            {{ form.shipping_phone(class="form-control") }}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            {{ form.shipping_address(class="form-control", rows=3) }}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label class="form-label">City</label>
+                                {{ form.shipping_city(class="form-control") }}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">State</label>
+                                {{ form.shipping_state(class="form-control") }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Pincode</label>
+                            {{ form.shipping_pincode(class="form-control") }}
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--light-bg); padding: 25px; border-radius: 12px;">
+                        <h3 style="margin-bottom: 20px;">Payment Method</h3>
+                        
+                        <div class="form-group">
+                            {{ form.payment_method(class="form-control") }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div style="background: var(--light-bg); padding: 25px; border-radius: 12px;">
+                        <h3 style="margin-bottom: 20px;">Order Summary</h3>
+                        
+                        {% for item in cart_items %}
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                            <img src="https://via.placeholder.com/60x60/1a1a2e/ffffff?text=P" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                            <div>
+                                <h6>{{ item.product.name }}</h6>
+                                <small>Qty: {{ item.quantity }} x Rs.{{ "%.0f"|format(item.product.get_final_price()) }}</small>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <strong>Rs.{{ "%.0f"|format(item.get_total_price()) }}</strong>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <hr style="margin: 15px 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Subtotal</span>
+                            <span>Rs.{{ "%.0f"|format(get_cart_total()) }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Shipping</span>
+                            <span>Free</span>
+                        </div>
+                        
+                        <hr style="margin: 15px 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <strong>Total</strong>
+                            <strong style="font-size: 1.5rem; color: var(--accent-color);">Rs.{{ "%.0f"|format(get_cart_total()) }}</strong>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Place Order</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

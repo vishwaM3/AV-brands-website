@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Shopping Cart' if lang == 'en' else 'ಕಾರ್ಟ್' }} - AV Brands{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">{{ 'Home' if lang == 'en' else 'ಮನೆ' }}</a>
+            <span class="breadcrumb-separator">/</span>
+            <span>{{ 'Shopping Cart' if lang == 'en' else 'ಕಾರ್ಟ್' }}</span>
+        </div>
+        
+        <h1 style="margin-bottom: 30px;">{{ 'Shopping Cart' if lang == 'en' else 'ಕಾರ್ಟ್' }}</h1>
+        
+        {% if cart_items %}
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>{{ 'Product' if lang == 'en' else 'ಉತ್ಪನ್ನ' }}</th>
+                            <th>{{ 'Price' if lang == 'en' else 'ಬೆಲೆ' }}</th>
+                            <th>{{ 'Quantity' if lang == 'en' else 'ಪ್ರಮಾಣ' }}</th>
+                            <th>{{ 'Total' if lang == 'en' else 'ಒಟ್ಟು' }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <img src="https://via.placeholder.com/80x80/1a1a2e/ffffff?text={{ item.product.name[:5] }}" alt="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                    <div>
+                                        <h5>{{ item.product.name_kannada if lang == 'kn' else item.product.name }}</h5>
+                                        {% if item.size %}<small>{{ 'Size:' if lang == 'en' else 'ಗಾತ್ರ:' }} {{ item.size }}</small><br>{% endif %}
+                                        {% if item.color %}<small>{{ 'Color:' if lang == 'en' else 'ಬಣ್ಣ:' }} {{ item.color }}</small>{% endif %}
+                                    </div>
+                            </td>
+                            <td>₹{{ "%.0f"|format(item.product.get_final_price()) }}</td>
+                            <td>
+                                <form action="{{ url_for('update_cart', item_id=item.id) }}" method="POST" style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="form-control" style="width: 60px;">
+                                    <button type="submit" class="btn btn-sm btn-primary">{{ 'Update' if lang == 'en' else 'ಅಪ್ಡೇಟ್' }}</button>
+                                </form>
+                            </td>
+                            <td>₹{{ "%.0f"|format(item.get_total_price()) }}</td>
+                            <td>
+                                <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" class="btn btn-sm btn-danger" data-confirm="{{ 'Remove this item?' if lang == 'en' else 'ಈ ಐಟಂ ತೆರವುಗೊಳಿಸಿ?' }}" onclick="return confirm(this.dataset.confirm)">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div>
+                <div style="background: var(--light-bg); padding: 25px; border-radius: 12px;">
+                    <h3 style="margin-bottom: 20px;">{{ 'Order Summary' if lang == 'en' else 'ಆರ್ಡರ್ ಸಾರಾಂಶ' }}</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>{{ 'Subtotal' if lang == 'en' else 'ಉಪ-ಒಟ್ಟು' }}</span>
+                        <span>₹{{ "%.0f"|format(get_cart_total()) }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>{{ 'Shipping' if lang == 'en' else 'ಶಿಪ್ಪಿಂಗ್' }}</span>
+                        <span>{{ 'Free' if lang == 'en' else 'ಉಚಿತ' }}</span>
+                    </div>
+                    <hr style="margin: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <strong>{{ 'Total' if lang == 'en' else 'ಒಟ್ಟು' }}</strong>
+                        <strong style="font-size: 1.25rem; color: var(--accent-color);">₹{{ "%.0f"|format(get_cart_total()) }}</strong>
+                    </div>
+                    
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-lg" style="width: 100%;">{{ 'Proceed to Checkout' if lang == 'en' else 'ಚೆಕೌಟ್‌ಗೆ ಮುಂದುವರಿಸಿ' }}</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg" style="width: 100%;">{{ 'Login to Checkout' if lang == 'en' else 'ಚೆಕೌಟ್‌ಗೆ ಲಾಗಿನ್ ಮಾಡಿ' }}</a>
+                    {% endif %}
+                </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fas fa-shopping-cart" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+            <h3>{{ 'Your cart is empty' if lang == 'en' else 'ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿದೆ' }}</h3>
+            <p>{{ 'Add some products to get started!' if lang == 'en' else 'ಪ್ರಾರಂಭಿಸಲು ಕೆಲವು ಉತ್ಪನ್ನಗಳನ್ನು ಸೇರಿಸಿ!' }}</p>
+            <a href="{{ url_for('shop') }}" class="btn btn-primary">{{ 'Shop Now' if lang == 'en' else 'ಈಗಲೇ ಖರೀದಿಸಿ' }}</a>
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ 'Manage Comments' if lang == 'en' else 'ಪ್ರತಿಕ್ರಿಯೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ' }}</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>{{ 'User' if lang == 'en' else 'ಬಳಕೆದಾರ' }}</th>
+            <th>{{ 'Subject' if lang == 'en' else 'ವಿಷಯ' }}</th>
+            <th>{{ 'Message' if lang == 'en' else 'ಸಂದೇಶ' }}</th>
+            <th>{{ 'Answered' if lang == 'en' else 'ಉತ್ತರಿತ' }}</th>
+            <th>{{ 'Responder' if lang == 'en' else 'ಪ್ರತಿಕ್ರಿಯಿಸುವವರು' }}</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for c in comments %}
+        <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.author.username if c.author else c.user_id }}</td>
+            <td>{{ c.subject }}</td>
+            <td>{{ c.message }}</td>
+            <td>{{ 'Yes' if c.is_answered else 'No' }}</td>
+            <td>{{ c.responder.username if c.responder else '' }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6">No comments found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

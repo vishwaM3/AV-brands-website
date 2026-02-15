@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Gallery - AV Brands{% endblock %}
+
+{% block extra_css %}
+<style>
+.gallery-hero { padding: 60px 0; text-align: center; background: linear-gradient(135deg, rgba(26,26,46,0.03), rgba(22,33,62,0.03)); }
+.lookbook { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; align-items: stretch; }
+.lookbook-card { position: relative; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); background: #fff; }
+.lookbook-card img { width: 100%; height: 420px; object-fit: cover; transition: transform 0.6s ease; }
+.lookbook-card:hover img { transform: scale(1.08); }
+.lookbook-caption { position: absolute; left: 16px; bottom: 16px; color: white; text-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+.lookbook-caption h3 { margin: 0; font-size: 1.125rem; }
+.lookbook-caption p { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.95; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="gallery-hero">
+    <div class="container">
+        <h1 class="hero-title">{{ 'Lookbook' if lang == 'en' else 'ಲೂಕ್ಬುಕ್' }}</h1>
+        <p class="hero-subtitle">{{ 'A curated selection of textures, shapes and seasonal pieces.' if lang == 'en' else 'ಟೆಕ್ಸ್ಚರ್‌ಗಳು, ಆಕಾರಗಳು ಮತ್ತು ಋತುಾನುસಾರ ಪೀಸಿನ ಆರೈಕೆ.' }}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="lookbook">
+            {% for img in images %}
+            <div class="lookbook-card card">
+                <img src="{{ url_for('static', filename='images/' + img) }}" alt="Look {{ loop.index }}">
+                <div class="lookbook-caption">
+                    <h3>AV Look {{ loop.index }}</h3>
+                    <p>{{ 'Minimal. Timeless. Crafted.' if lang == 'en' else 'ನಿಮಿಷ, ಶಾಶ್ವತ, ವಿನ್ಯಾಸ.' }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
