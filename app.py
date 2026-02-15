@@ -13,6 +13,8 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField, IntegerField, FloatField, BooleanField
 from wtforms.validators import DataRequired, Email, Length, Optional, NumberRange
+import logging
+from werkzeug.utils import secure_filename
 
 from config import config
 from models import db, User, Category, Product, CartItem, WishlistItem, Order, OrderItem, Offer, Comment, RecentlyViewed
@@ -23,6 +25,9 @@ app.config.from_object(config['default'])
 
 # Initialize extensions
 db.init_app(app)
+# Configure basic logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please login to access this page.'
@@ -322,6 +327,7 @@ def add_to_cart():
     size = request.form.get('size')
     color = request.form.get('color')
     
+    logger.debug('Add to cart: user=%s product=%s qty=%s size=%s color=%s', getattr(current_user, 'id', None), product_id, quantity, size, color)
     product = Product.query.get_or_404(product_id)
     
     existing_item = CartItem.query.filter_by(user_id=current_user.id, product_id=product_id, size=size, color=color).first()
@@ -342,6 +348,7 @@ def add_to_cart():
 def update_cart(item_id):
     """Update cart item quantity"""
     quantity = request.form.get('quantity', 1, type=int)
+    logger.debug('Update cart item %s quantity to %s by user %s', item_id, quantity, getattr(current_user, 'id', None))
     cart_item = CartItem.query.get_or_404(item_id)
     if cart_item.user_id != current_user.id:
         flash('Unauthorized', 'danger')
@@ -381,6 +388,7 @@ def wishlist():
 @login_required
 def add_to_wishlist(product_id):
     """Add item to wishlist"""
+    logger.debug('Toggle wishlist: user=%s product=%s', getattr(current_user, 'id', None), product_id)
     product = Product.query.get_or_404(product_id)
     existing = WishlistItem.query.filter_by(user_id=current_user.id, product_id=product_id).first()
     
@@ -497,15 +505,18 @@ def login():
     form = LoginForm()
     
     if form.validate_on_submit():
+        logger.debug('Login attempt: %s', form.email.data)
         user = User.query.filter_by(email=form.email.data).first()
-        
+
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember.data)
+            logger.info('User logged in: %s', user.email)
             flash('Login successful!', 'success')
-            
+
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
+            logger.warning('Login failed for: %s', form.email.data)
             flash('Login failed. Check email and password.', 'danger')
     
     return render_template('login.html', form=form, lang=lang)
@@ -520,7 +531,9 @@ def signup():
     form = RegistrationForm()
     
     if form.validate_on_submit():
+        logger.debug('Signup attempt: %s', form.email.data)
         if form.password.data != form.confirm_password.data:
+            logger.warning('Signup password mismatch for: %s', form.email.data)
             flash('Passwords do not match!', 'danger')
             return render_template('signup.html', form=form, lang=lang)
         
@@ -540,7 +553,7 @@ def signup():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        
+        logger.info('New user registered: %s', user.email)
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
     
@@ -678,9 +691,23 @@ def admin_add_product():
     form.category.choices = [(c.id, c.name) for c in Category.query.all()]
     
     if form.validate_on_submit():
+        logger.debug('Admin add product: %s', form.data)
         sizes_json = json.dumps([s.strip() for s in form.sizes.data.split(',')]) if form.sizes.data else json.dumps([])
         colors_json = json.dumps([c.strip() for c in form.colors.data.split(',')]) if form.colors.data else json.dumps([])
-        
+
+        image_filename = 'product_placeholder.jpg'
+        # handle optional image upload (input name should be image1)
+        img = request.files.get('image1')
+        if img and img.filename:
+            filename = secure_filename(img.filename)
+            dest = os.path.join(app.root_path, 'static', 'images', filename)
+            try:
+                img.save(dest)
+                image_filename = filename
+                logger.info('Saved uploaded product image: %s', filename)
+            except Exception as e:
+                logger.exception('Failed to save uploaded image: %s', e)
+
         product = Product(
             name=form.name.data,
             name_kannada=form.name_kannada.data,
@@ -694,10 +721,11 @@ def admin_add_product():
             stock=form.stock.data,
             is_featured=form.is_featured.data,
             is_active=form.is_active.data,
-            image1='product_placeholder.jpg'
+            image1=image_filename
         )
         db.session.add(product)
         db.session.commit()
+        logger.info('Product added: %s (id=%s)', product.name, product.id)
         flash('Product added successfully!', 'success')
         return redirect(url_for('admin_products'))
     
@@ -775,7 +803,9 @@ def admin_orders():
 def admin_update_order(order_id):
     """Update order status"""
     order = Order.query.get_or_404(order_id)
-    order.status = request.form.get('status')
+    new_status = request.form.get('status')
+    logger.debug('Admin update order %s -> %s by user %s', order.order_number, new_status, getattr(current_user, 'id', None))
+    order.status = new_status
     db.session.commit()
     flash(f'Order {order.order_number} status updated!', 'success')
     return redirect(url_for('admin_orders'))
@@ -797,6 +827,7 @@ def admin_add_offer():
     form.product.choices = [(0, 'All Products')] + [(p.id, p.name) for p in Product.query.filter_by(is_active=True).all()]
     
     if form.validate_on_submit():
+        logger.debug('Admin add offer: %s', form.data)
         product_id = form.product.data if form.product.data != 0 else None
         
         offer = Offer(
@@ -837,7 +868,9 @@ def admin_comments():
 def admin_respond_comment(comment_id):
     """Respond to comment"""
     comment = Comment.query.get_or_404(comment_id)
-    comment.admin_response = request.form.get('response')
+    response_text = request.form.get('response')
+    logger.debug('Admin responding to comment %s by user %s: %s', comment_id, getattr(current_user, 'id', None), response_text)
+    comment.admin_response = response_text
     comment.is_answered = True
     comment.responded_by = current_user.id
     comment.responded_at = datetime.utcnow()

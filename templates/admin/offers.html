@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Offers - AV Brands{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h2>Offers</h2>
+    <form method="post" action="{{ url_for('admin_add_offer') }}">
+        {{ form.hidden_tag() if form is defined else '' }}
+        <div class="form-group"><label>Title</label><input name="title" class="form-control"></div>
+        <div class="form-group"><label>Discount (%)</label><input name="discount_percentage" class="form-control"></div>
+        <button class="btn btn-primary" type="submit">Add Offer</button>
+    </form>
+    <hr>
+    <ul>
+    {% for o in offers %}
+        <li>{{ o.title }} - {{ o.discount_percentage }}%</li>
+    {% else %}
+        <li>No offers</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

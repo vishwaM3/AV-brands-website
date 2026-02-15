@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmed - AV Brands{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h2>{{ 'Order Confirmed' if lang == 'en' else 'ಆರ್ಡರ್ ದೃಢೀಕೃತ' }}</h2>
+    <p>{{ 'Thank you! Your order has been placed.' if lang == 'en' else 'ಧನ್ಯವಾದಗಳು! ನಿಮ್ಮ ಆರ್ಡರ್ ಸಲ್ಲಿಸಲಾಗಿದೆ.' }}</p>
+    <p><strong>Order:</strong> {{ order.order_number }}</p>
+    <p><strong>Total:</strong> ₹{{ order.total_amount }}</p>
+</div>
+{% endblock %}

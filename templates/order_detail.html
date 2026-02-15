@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Detail - AV Brands{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h2>{{ 'Order' if lang == 'en' else 'ಆರ್ಡರ್' }} {{ order.order_number }}</h2>
+    <p><strong>{{ 'Status' if lang == 'en' else 'ಸ್ಥಿತಿ' }}:</strong> {{ order.status }}</p>
+    <p><strong>{{ 'Total' if lang == 'en' else 'ಮೊತ್ತ' }}:</strong> ₹{{ order.total_amount }}</p>
+</div>
+{% endblock %}

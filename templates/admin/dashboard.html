@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - AV Brands{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h2>Admin Dashboard</h2>
+    <ul>
+        <li>Total users: {{ total_users }}</li>
+        <li>Total orders: {{ total_orders }}</li>
+        <li>Total products: {{ total_products }}</li>
+        <li>Total revenue: ₹{{ total_revenue }}</li>
+    </ul>
+</div>
+{% endblock %}

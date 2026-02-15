@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Orders - AV Brands{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h2>Orders</h2>
+    <table class="table">
+        <thead><tr><th>Order</th><th>User</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for o in orders %}
+            <tr>
+                <td>{{ o.order_number }}</td>
+                <td>{{ o.user_id }}</td>
+                <td>₹{{ o.total_amount }}</td>
+                <td>{{ o.status }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4">No orders</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
